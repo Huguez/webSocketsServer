@@ -1,79 +1,59 @@
-const express = require( 'express' )
-const cors = require( 'cors' )
-const { socketController } = require('../sockets/controller')
+const express = require('express');
+const cors = require('cors');
 
-// const { dbConnect } = require( '../databases/config' )
+const { socketController } = require('../sockets/controller');
 
 class Server {
 
-   constructor(){
-      this.app    = express()
-      this.port   = process.env.PORT
-      this.server = require( 'http' ).createServer( this.app )
-      this.io     = require( 'socket.io' )( this.server )
+    constructor() {
+        this.app    = express();
+        this.port   = process.env.PORT;
+        this.server = require('http').createServer( this.app );
+        this.io     = require('socket.io')( this.server );
 
+        this.paths = {};
 
-      // this.base = '/api'
-      // this.paths = {
-      //    userPath:     `${ this.base }/usuarios`,
-      //    authPath:     `${ this.base }/auth`,
-      //    categoryPath: `${ this.base }/categorias`,
-      //    productPath:  `${ this.base }/productos`,
-      //    searchtPath:  `${ this.base }/search`,
-      //    uploadPath:   `${ this.base }/uploads`
-      // }
+        // Middlewares
+        this.middlewares();
 
-      // this.conectarDB()
+        // Rutas de mi aplicación
+      //   this.routes();
 
-      this.middlewares()
+        // Sockets
+        this.sockets();
+    }
 
-      // this.routes()
-      this.sockets()
+    middlewares() {
 
-   }
+        // CORS
+        this.app.use( cors() );
 
-   // async conectarDB(){
-   //    await dbConnect()
-   // }
+        // Directorio Público
+        this.app.use( express.static('public') );
 
-   middlewares() {
-      // directorio publico
-      this.app.use( express.static( 'public' ) )
+    }
 
-      // CORS
-      this.app.use( cors() )
+    routes() {
+        
+        // this.app.use( this.paths.auth, require('../routes/auth'));
+        
+    }
 
-      // parseo del body
-      // this.app.use( express.json() );
+    sockets() {
 
-      // // file manage
-      // this.app.use( fileUpload({
-      //    useTempFiles : true,
-      //    tempFileDir : '/tmp/',
-      //    createParentPath: true,
-      // }) )
-   }
+        this.io.on('connection', socketController );
 
+    }
 
-   routes() {
-      // this.app.use( this.paths["userPath"],     require( '../routes/user' ) )
-      // this.app.use( this.paths["authPath"],     require( '../routes/auth' ) )
-      // this.app.use( this.paths["categoryPath"], require( '../routes/category' ) )
-      // this.app.use( this.paths["productPath"],  require( '../routes/producto' ) )
-      // this.app.use( this.paths["searchtPath"],  require( '../routes/buscar' ) )
-      // this.app.use( this.paths["uploadPath"],   require( '../routes/upload' ) )
-   }
+    start() {
+        this.server.listen( this.port, () => {
+            console.log('Servidor corriendo en puerto', this.port );
+        });
+    }
 
-   sockets(){
-      this.io.on( 'connection', socketController );
-   }
-
-   start(){
-      this.server.listen( this.port, () => {
-         console.log(`Server running in ${ this.port }`);
-         console.log(`Go to http://localhost:${ this.port }/` );
-      } );
-   }
 }
 
-module.exports = Server
+
+
+
+module.exports = Server;

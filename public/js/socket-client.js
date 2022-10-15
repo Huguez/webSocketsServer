@@ -1,40 +1,47 @@
-const lblonline  = document.querySelector( "#online" )
-const lbloffline = document.querySelector( "#offline" )
 
-const cajaText  = document.querySelector( '#cajaText' )
-const btnEnviar = document.querySelector( '#btnEnviar' )
-
-const cliente = io();
-
-cliente.on( 'connect', () => {
-   console.log( "Conectado ", cliente.id );
-   lbloffline.style.display = "none"
-   lblonline.style.display = ""
-} )
+// Referencias del HTML
+const lblOnline  = document.querySelector('#lblOnline');
+const lblOffline = document.querySelector('#lblOffline');
+const txtMensaje = document.querySelector('#txtMensaje');
+const btnEnviar  = document.querySelector('#btnEnviar');
 
 
-cliente.on( 'disconnect', () => {
-   console.log( "DESonectado " );
-   lblonline.style.display = "none"
-   lbloffline.style.display = ""
-} )
+const socket = io();
+
+
+
+socket.on('connect', () => {
+    // console.log('Conectado');
+
+    lblOffline.style.display = 'none';
+    lblOnline.style.display  = '';
+
+});
+
+socket.on('disconnect', () => {
+    // console.log('Desconectado del servidor');
+
+    lblOnline.style.display  = 'none';
+    lblOffline.style.display = '';
+});
+
+
+socket.on('enviar-mensaje', (payload) => {
+    console.log( payload )
+})
 
 
 btnEnviar.addEventListener( 'click', () => {
-   const mensaje = cajaText.value
-   
-   const payload = {
-      mensaje, 
-      id: "123456",
-      fecha: new Date().getTime()
-   }
 
-   cliente.emit( 'enviar-mensaje', payload, ( id )=> {
-      console.log( id );
-   } )
+    const mensaje = txtMensaje.value;
+    const payload = {
+        mensaje,
+        id: '123ABC',
+        fecha: new Date().getTime()
+    }
+    
+    socket.emit( 'enviar-mensaje', payload, ( id ) => {
+        console.log('Desde el server', id );
+    });
 
-} )
-
-cliente.on( 'Desde el server', ( payload ) => {
-   console.log( payload );
-} )
+});
